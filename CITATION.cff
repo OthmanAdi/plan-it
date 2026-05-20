@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: "plan-it: HTML-first persistent planning skill for Claude Code"
+message: "If you use this skill, please cite it as below."
+type: software
+authors:
+  - family-names: "Adi"
+    given-names: "Ahmad Othman Ammar"
+    alias: "OthmanAdi"
+identifiers:
+  - type: url
+    value: "https://github.com/OthmanAdi/plan-it"
+repository-code: "https://github.com/OthmanAdi/plan-it"
+url: "https://github.com/OthmanAdi/plan-it"
+abstract: >
+  plan-it is a Claude Code skill that produces a single self-contained
+  HTML plan with embedded JSON state, interactive controls (drag-and-drop,
+  sliders, copy-as-markdown), and survives /clear via IDE session catchup.
+  It is the successor format to planning-with-files, built for the
+  HTML-as-control-surface paradigm Anthropic engineer Thariq Shihipar
+  introduced in "The Unreasonable Effectiveness of HTML" (2026-05-08).
+keywords:
+  - claude-code
+  - claude-skills
+  - agent-skills
+  - html-planning
+  - planning
+  - thariq-html
+  - manus
+license: MIT
+version: "0.1.0"
+date-released: "2026-05-20"

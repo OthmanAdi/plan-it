@@ -1,0 +1,51 @@
+{
+  "name": "plan-it",
+  "version": "0.1.0",
+  "description": "HTML-first persistent planning skill. Single self-contained plan.html with interactive phases, drag-and-drop, sliders, mockups, copy-as-markdown export, embedded JSON state. Survives /clear via session catchup. Tamper-protected by SHA-256. Mirrors across 17 IDEs.",
+  "author": {
+    "name": "OthmanAdi",
+    "url": "https://github.com/OthmanAdi"
+  },
+  "homepage": "https://github.com/OthmanAdi/plan-it",
+  "repository": "https://github.com/OthmanAdi/plan-it",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-skills",
+    "agent-skills",
+    "html-planning",
+    "planning",
+    "manus",
+    "html-first",
+    "thariq",
+    "cursor",
+    "codex",
+    "kiro",
+    "hermes",
+    "openclaw",
+    "antigravity",
+    "kilocode",
+    "adal",
+    "pi",
+    "copilot",
+    "mastra",
+    "factory"
+  ],
+  "skills": [
+    "plan-it"
+  ],
+  "commands": [
+    "plan",
+    "plan-render",
+    "plan-attest",
+    "plan-status",
+    "plan-export",
+    "plan-goal",
+    "plan-loop"
+  ],
+  "companions": {
+    "optional": [
+      "planning-with-files"
+    ]
+  }
+}

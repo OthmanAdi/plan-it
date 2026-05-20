@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" role="img" aria-label="plan-it banner">
+  <defs>
+    <style>
+      .bg { fill: #fafaf7; }
+      .fg { fill: #1b1b18; }
+      .muted { fill: #5b5b56; }
+      .accent { fill: #c8553d; }
+      .code { fill: #f1f1ec; }
+      .ok { fill: #2a6f4e; }
+      .warn { fill: #b9802b; }
+      .err { fill: #a73326; }
+      .stroke-fg { stroke: #1b1b18; }
+      .stroke-soft { stroke: #c8c8c2; }
+      .stroke-accent { stroke: #c8553d; }
+      .serif { font-family: 'ui-serif', Georgia, 'Times New Roman', serif; }
+      .sans { font-family: system-ui, -apple-system, sans-serif; }
+      .mono { font-family: 'ui-monospace', 'SFMono-Regular', Menlo, monospace; }
+      @media (prefers-color-scheme: dark) {
+        .bg { fill: #161613; }
+        .fg { fill: #ecece6; }
+        .muted { fill: #9c9c95; }
+        .accent { fill: #e07a5f; }
+        .code { fill: #232320; }
+        .ok { fill: #6ab089; }
+        .warn { fill: #d9a25a; }
+        .err { fill: #d96959; }
+        .stroke-fg { stroke: #ecece6; }
+        .stroke-soft { stroke: #3a3a36; }
+        .stroke-accent { stroke: #e07a5f; }
+      }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1280" height="320"/>
+
+  <!-- left rail: wordmark + tagline -->
+  <g transform="translate(64, 64)">
+    <text class="fg serif" x="0" y="60" font-size="84" font-weight="700" letter-spacing="-2">plan-it</text>
+    <text class="muted mono" x="0" y="92" font-size="13">v0.1.0 / HTML-first persistent planning</text>
+    <text class="fg sans" x="0" y="148" font-size="22" font-weight="500">Stop reading walls of markdown.</text>
+    <text class="accent sans" x="0" y="178" font-size="22" font-weight="700">Start seeing your plan.</text>
+  </g>
+
+  <!-- right side: a tiny mock plan rendering -->
+  <g transform="translate(720, 48)">
+    <!-- frame -->
+    <rect class="bg stroke-fg" x="0" y="0" width="496" height="224" fill="none" stroke-width="1.5"/>
+    <!-- title bar -->
+    <line x1="0" y1="40" x2="496" y2="40" class="stroke-fg" stroke-width="1"/>
+    <text class="fg serif" x="16" y="26" font-size="14" font-weight="700">Implementation Plan</text>
+    <text class="muted mono" x="380" y="26" font-size="10">3 of 4 phases</text>
+    <!-- tab row -->
+    <line x1="0" y1="64" x2="496" y2="64" class="stroke-soft" stroke-width="1"/>
+    <text class="fg sans" x="16" y="58" font-size="11" font-weight="600">Phases</text>
+    <line x1="14" y1="62" x2="62" y2="62" class="stroke-accent" stroke-width="2"/>
+    <text class="muted sans" x="80" y="58" font-size="11">Mockups</text>
+    <text class="muted sans" x="140" y="58" font-size="11">Risks</text>
+    <text class="muted sans" x="190" y="58" font-size="11">Decisions</text>
+
+    <!-- phase rows -->
+    <g transform="translate(16, 80)">
+      <rect class="bg stroke-soft" x="0" y="0" width="464" height="38" fill="none" stroke-width="1" opacity="0.7"/>
+      <text class="muted sans" x="12" y="22" font-size="11" font-weight="600">Phase 1: Foundation</text>
+      <rect class="ok" x="380" y="11" width="68" height="16" fill-opacity="0.15"/>
+      <rect x="380" y="11" width="68" height="16" fill="none" class="stroke-fg" stroke-width="1"/>
+      <text class="ok mono" x="389" y="22" font-size="9" font-weight="700">COMPLETE</text>
+    </g>
+
+    <g transform="translate(16, 124)">
+      <rect class="bg stroke-accent" x="0" y="0" width="464" height="38" fill="none" stroke-width="1.5"/>
+      <text class="fg sans" x="12" y="22" font-size="11" font-weight="600">Phase 2: Build</text>
+      <rect class="accent" x="376" y="11" width="76" height="16" fill-opacity="0.15"/>
+      <rect x="376" y="11" width="76" height="16" fill="none" class="stroke-accent" stroke-width="1"/>
+      <text class="accent mono" x="383" y="22" font-size="9" font-weight="700">IN PROGRESS</text>
+    </g>
+
+    <g transform="translate(16, 168)">
+      <rect class="bg stroke-soft" x="0" y="0" width="464" height="38" fill="none" stroke-width="1"/>
+      <text class="muted sans" x="12" y="22" font-size="11">Phase 3: Verify</text>
+      <rect x="396" y="11" width="52" height="16" fill="none" class="stroke-soft" stroke-width="1"/>
+      <text class="muted mono" x="404" y="22" font-size="9" font-weight="700">PENDING</text>
+    </g>
+  </g>
+
+  <!-- footer rule -->
+  <line x1="64" y1="288" x2="1216" y2="288" class="stroke-soft" stroke-width="1"/>
+  <text class="muted mono" x="64" y="306" font-size="11">17 IDEs / 10 templates / SHA-256 attested / survives /clear / single HTML file</text>
+  <text class="muted mono" x="996" y="306" font-size="11">github.com/OthmanAdi/plan-it</text>
+</svg>

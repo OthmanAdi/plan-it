@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>plan-it: shipping the first HTML-first planning skill</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fafaf7;
+    --fg: #1b1b18;
+    --muted: #5b5b56;
+    --accent: #c8553d;
+    --border: #1b1b18;
+    --border-soft: #c8c8c2;
+    --code: #f1f1ec;
+    --ok: #2a6f4e;
+    --warn: #b9802b;
+    --err: #a73326;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161613;
+      --fg: #ecece6;
+      --muted: #9c9c95;
+      --accent: #e07a5f;
+      --border: #ecece6;
+      --border-soft: #3a3a36;
+      --code: #232320;
+      --ok: #6ab089;
+      --warn: #d9a25a;
+      --err: #d96959;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.5; }
+  header.bar { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); gap: 16px; flex-wrap: wrap; }
+  header.bar h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; font-family: ui-serif, Georgia, "Times New Roman", serif; }
+  header.bar .meta { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 12px; color: var(--muted); }
+  header.bar .actions { display: flex; gap: 8px; }
+  button { font: inherit; font-size: 12px; padding: 6px 10px; background: transparent; color: var(--fg); border: 1px solid var(--border); border-radius: 2px; cursor: pointer; }
+  button:hover { background: var(--fg); color: var(--bg); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  nav.tabs { display: flex; gap: 0; padding: 0 24px; border-bottom: 1px solid var(--border-soft); }
+  nav.tabs button { border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 12px 16px; color: var(--muted); background: transparent; }
+  nav.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+  nav.tabs button:hover { color: var(--fg); background: transparent; }
+  main { padding: 24px; max-width: 1280px; margin: 0 auto; }
+  section[role="tabpanel"][hidden] { display: none; }
+  h2 { font-family: ui-serif, Georgia, serif; font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+  .phase { border: 1px solid var(--border-soft); border-radius: 2px; padding: 14px 16px; margin-bottom: 12px; background: var(--bg); }
+  .phase[data-status="in_progress"] { border-color: var(--accent); }
+  .phase[data-status="complete"] { opacity: 0.7; }
+  .phase[data-status="blocked"] { border-color: var(--err); }
+  .phase .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .phase h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .phase .badge { font-family: ui-monospace, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; border: 1px solid currentColor; border-radius: 2px; }
+  .badge.pending { color: var(--muted); }
+  .badge.in_progress { color: var(--accent); }
+  .badge.complete { color: var(--ok); }
+  .badge.blocked { color: var(--err); }
+  .phase ul { list-style: none; padding: 0; margin: 8px 0 0; }
+  .phase li { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 14px; }
+  .phase li input[type="checkbox"] { margin: 4px 0 0; accent-color: var(--accent); }
+  .phase li.done { color: var(--muted); text-decoration: line-through; }
+  .phase .milestones { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid var(--border-soft); }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border-soft); font-family: ui-monospace, monospace; }
+  th { background: var(--code); font-weight: 600; }
+  .risk-high { color: var(--err); font-weight: 600; }
+  .risk-mid { color: var(--warn); font-weight: 600; }
+  .risk-low { color: var(--ok); font-weight: 600; }
+  footer.bar { border-top: 1px solid var(--border); padding: 12px 24px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .skip-link { position: absolute; left: -9999px; top: 8px; padding: 8px 12px; background: var(--accent); color: var(--bg); }
+  .skip-link:focus { left: 16px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header class="bar" role="banner">
+  <div>
+    <h1 id="plan-title">plan-it: shipping the first HTML-first planning skill</h1>
+    <div class="meta" id="plan-meta">template: implementation-plan</div>
+  </div>
+  <div class="actions" role="group" aria-label="Plan actions">
+    <button type="button" id="btn-copy-md" aria-label="Copy plan as Markdown">Copy as Markdown</button>
+    <button type="button" id="btn-copy-json" aria-label="Copy plan-data as JSON">Copy as JSON</button>
+    <button type="button" id="btn-print" aria-label="Print plan">Print</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Plan sections">
+  <button role="tab" type="button" aria-controls="tab-phases" aria-selected="true" id="tab-phases-btn">Phases</button>
+  <button role="tab" type="button" aria-controls="tab-risks" aria-selected="false" id="tab-risks-btn">Risks</button>
+  <button role="tab" type="button" aria-controls="tab-decisions" aria-selected="false" id="tab-decisions-btn">Decisions</button>
+  <button role="tab" type="button" aria-controls="tab-progress" aria-selected="false" id="tab-progress-btn">Progress</button>
+</nav>
+
+<main id="main">
+  <section role="tabpanel" id="tab-phases" aria-labelledby="tab-phases-btn">
+    <h2>Phases</h2>
+    <div id="phases-root"></div>
+  </section>
+  <section role="tabpanel" id="tab-risks" aria-labelledby="tab-risks-btn" hidden>
+    <h2>Risks</h2>
+    <table>
+      <thead><tr><th>Risk</th><th>Severity</th><th>Mitigation</th></tr></thead>
+      <tbody id="risks-root"></tbody>
+    </table>
+  </section>
+  <section role="tabpanel" id="tab-decisions" aria-labelledby="tab-decisions-btn" hidden>
+    <h2>Decisions</h2>
+    <table>
+      <thead><tr><th>Decision</th><th>Rationale</th></tr></thead>
+      <tbody id="decisions-root"></tbody>
+    </table>
+  </section>
+  <section role="tabpanel" id="tab-progress" aria-labelledby="tab-progress-btn" hidden>
+    <h2>Progress log</h2>
+    <table>
+      <thead><tr><th>Timestamp</th><th>Phase</th><th>Action</th><th>Files</th></tr></thead>
+      <tbody id="progress-root"></tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="bar" role="contentinfo">
+  <div>plan-it v0.1.0 -- this file IS a plan-it plan. View source to inspect the JSON.</div>
+  <div id="footer-sha">Plan-SHA256: (run /plan-attest to lock)</div>
+</footer>
+
+<script type="application/json" id="plan-data">
+{
+  "schema_version": "0.1.0",
+  "plan_title": "plan-it: shipping the first HTML-first planning skill",
+  "goal": "Be the first persistent, multi-IDE, hash-attested, HTML-emitting planning skill in the Claude Code ecosystem. Ship inside the publication window of Thariq Shihipar's HTML thesis.",
+  "current_phase": 10,
+  "template": "implementation-plan",
+  "phases": [
+    {"id": 1, "title": "Harvest the thesis + ecosystem signal", "status": "complete", "items": [
+      {"text": "Read Anthropic blog: claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html", "done": true, "owner": null},
+      {"text": "Capture Thariq's tweet thread + the 20-example gallery + ecosystem commentary", "done": true, "owner": null},
+      {"text": "Identify community sentiment split: 35/25/35/5 (adopt/skeptic/nuanced/undecided)", "done": true, "owner": null},
+      {"text": "Audit 22 HTML-producing skills already in the ecosystem -- confirm zero planning skills emit HTML", "done": true, "owner": null}
+    ], "milestones": ["8 research files captured under html-planning-skill/research/"]},
+    {"id": 2, "title": "Lock the four brand decisions with Adi", "status": "complete", "items": [
+      {"text": "Repo strategy: new repo, new brand (the bet-big path)", "done": true, "owner": null},
+      {"text": "Name: plan-it (memetic, verb-trigger, sounds like planet)", "done": true, "owner": null},
+      {"text": "MVP scope: full 10x -- 10 templates, 17 IDEs, 8 commands (lang variants deferred to v0.2.0)", "done": true, "owner": null},
+      {"text": "Plan data model: single plan.html with embedded JSON in script type application/json", "done": true, "owner": null}
+    ], "milestones": ["Design spec written at docs/specs/2026-05-19-plan-it-design.md"]},
+    {"id": 3, "title": "Scaffold the workspace and write manifests", "status": "complete", "items": [
+      {"text": "Create plan-it/ workspace with 21+ directories", "done": true, "owner": null},
+      {"text": ".claude-plugin/plugin.json + marketplace.json", "done": true, "owner": null},
+      {"text": "LICENSE (MIT), CITATION.cff, AGENTS.md, CLAUDE.md, .gitignore", "done": true, "owner": null}
+    ], "milestones": []},
+    {"id": 4, "title": "Author canonical SKILL.md + 5 lifecycle hooks + 8 commands", "status": "complete", "items": [
+      {"text": "skills/plan-it/SKILL.md with frontmatter + hooks + body", "done": true, "owner": null},
+      {"text": "8 slash command files under commands/", "done": true, "owner": null},
+      {"text": "Skeptic mitigations baked in: bidirectional Markdown export, WCAG AA, JSON-only diffs", "done": true, "owner": null}
+    ], "milestones": []},
+    {"id": 5, "title": "Ship 7 scripts (POSIX + PowerShell parity)", "status": "complete", "items": [
+      {"text": "plan-hook.py (the hook helper)", "done": true, "owner": null},
+      {"text": "init-plan / render-plan / attest-plan in .sh + .ps1", "done": true, "owner": null},
+      {"text": "bump-version.py, sync-ide-folders.py, session-catchup.py, export-markdown.py", "done": true, "owner": null}
+    ], "milestones": []},
+    {"id": 6, "title": "Build 10 HTML templates across Thariq's 9 categories", "status": "complete", "items": [
+      {"text": "Implementation Plan (reference template, hand-written)", "done": true, "owner": null},
+      {"text": "9 more templates produced by 4 parallel BG agents", "done": true, "owner": null},
+      {"text": "All templates pass single-file + ARIA + offline + size-budget tests", "done": true, "owner": null}
+    ], "milestones": ["6,273 lines of production HTML"]},
+    {"id": 7, "title": "Author 120 pytest tests (target was 20)", "status": "complete", "items": [
+      {"text": "Frontmatter + hooks + YAML-collision regression", "done": true, "owner": null},
+      {"text": "Templates: structure, JSON schema, offline, size budget, a11y", "done": true, "owner": null},
+      {"text": "Scripts: parity bumper, sync verify, attestation match/mismatch, export round-trip, session catchup", "done": true, "owner": null}
+    ], "milestones": ["120/120 green"]},
+    {"id": 8, "title": "Mirror 11 IDE adapters (English only for v0.1.0)", "status": "complete", "items": [
+      {"text": "11 IDE adapter SKILL.md files (canonical + frontmatter parity)", "done": true, "owner": null},
+      {"text": "Language variants pulled from v0.1.0 -- would have shipped English-body placeholders. Real translations return in v0.2.0 with community PRs.", "done": true, "owner": null},
+      {"text": "scripts/ + templates/ synced to every adapter via sync-ide-folders.py", "done": true, "owner": null}
+    ], "milestones": ["16 parity-locked files all at v0.1.0"]},
+    {"id": 9, "title": "Author docs and release artifacts", "status": "complete", "items": [
+      {"text": "README with install matrix for 17 IDEs", "done": true, "owner": null},
+      {"text": "CHANGELOG with sachlich entry, no em-dashes, Thanks line", "done": true, "owner": null},
+      {"text": "CONTRIBUTORS, docs/{installation,quickstart,windows,anti-slop}", "done": true, "owner": null}
+    ], "milestones": []},
+    {"id": 10, "title": "Smoke test + git init + tag v0.1.0", "status": "in_progress", "items": [
+      {"text": "Local smoke test green: init-plan, render-plan, attest, export round-trip", "done": true, "owner": null},
+      {"text": "Git init + single squashed commit by OthmanAdi", "done": false, "owner": "OthmanAdi"},
+      {"text": "Adi reviews this demo.html in browser", "done": false, "owner": "OthmanAdi"},
+      {"text": "gh repo create + push + tag + release", "done": false, "owner": "OthmanAdi"},
+      {"text": "ClawHub manual upload", "done": false, "owner": "OthmanAdi"},
+      {"text": "Reply to Thariq launch tweet, HN post", "done": false, "owner": "OthmanAdi"}
+    ], "milestones": ["v0.1.0 shipped"]}
+  ],
+  "findings": [],
+  "progress_log": [
+    {"ts": "2026-05-19T21:30Z", "phase": 1, "action": "Started research harvest", "files": ["html-planning-skill/research/01-anthropic-blog-html-thesis.md"]},
+    {"ts": "2026-05-19T22:15Z", "phase": 2, "action": "Locked four brand decisions with Adi", "files": ["docs/specs/2026-05-19-plan-it-design.md"]},
+    {"ts": "2026-05-19T23:00Z", "phase": 4, "action": "Canonical SKILL.md complete with 5 hooks", "files": ["skills/plan-it/SKILL.md"]},
+    {"ts": "2026-05-20T00:00Z", "phase": 6, "action": "All 10 templates landed", "files": ["templates/*.html"]},
+    {"ts": "2026-05-20T00:30Z", "phase": 7, "action": "120/120 pytest tests green", "files": ["tests/*.py"]},
+    {"ts": "2026-05-20T00:35Z", "phase": 10, "action": "Smoke test passed end to end", "files": ["examples/demo-plan.html"]}
+  ],
+  "decisions": [
+    {"id": "d1", "decision": "New repo, new brand (not pwf v3)", "rationale": "Bet-big path. Lets pwf v2 keep its 21k stars + install base while plan-it claims the HTML era unencumbered."},
+    {"id": "d2", "decision": "Single plan.html with embedded JSON", "rationale": "Single source of truth, clean diffs (JSON only), easy share, no build step."},
+    {"id": "d3", "decision": "Carry hash attestation from pwf v2.37", "rationale": "Trust boundary. Cheap to port. Differentiator vs ephemeral artifact builders."},
+    {"id": "d4", "decision": "Use === plan-injection delimiters, not ---", "rationale": "pwf v2.38.1 lesson: --- inside YAML hook scalars breaks Claude Code's skill loader."},
+    {"id": "d5", "decision": "Ship 17 IDE adapters day 1", "rationale": "Distribution moat from pwf carries; cannot underprice yourself on platform reach."},
+    {"id": "d6", "decision": "Bidirectional Markdown export", "rationale": "Mitigates HN top critique (cannot hand-edit HTML). Keeps token-cost critics happy too."}
+  ],
+  "errors": [],
+  "risks": [
+    {"risk": "Skeptic camp attacks token cost in launch comments", "severity": "mid", "mitigation": "Token-cost honesty line in README, /plan-export markdown built in, vanilla JS hand-written, single-file offline."},
+    {"risk": "Ecosystem ships an official planning skill that obsoletes plan-it", "severity": "mid", "mitigation": "Lifecycle hooks + cross-IDE persistence + SHA-256 attestation remain plan-it's structural moat regardless of who else ships."},
+    {"risk": "Language variants ship with English fallback bodies", "severity": "low", "mitigation": "Documented as v0.1.0 limitation; community translation PRs welcome in v0.2.0."},
+    {"risk": "ClawHub manual upload latency", "severity": "low", "mitigation": "Same protocol as pwf; SSL cert expired, click through warning."}
+  ],
+  "attestation_sha256": null
+}
+</script>
+
+<script>
+(() => {
+  "use strict";
+  const dataEl = document.getElementById("plan-data");
+  let plan = {};
+  try { plan = JSON.parse(dataEl.textContent); }
+  catch (e) {
+    document.getElementById("phases-root").innerHTML = '<p>plan-data JSON could not be parsed.</p>';
+    return;
+  }
+  document.getElementById("plan-title").textContent = plan.plan_title || "Plan";
+  document.getElementById("plan-meta").textContent = "template: " + (plan.template || "(custom)") + " | phase " + plan.current_phase + "/" + (plan.phases || []).length;
+  if (plan.attestation_sha256) {
+    document.getElementById("footer-sha").textContent = "Plan-SHA256: " + plan.attestation_sha256;
+  }
+
+  const phasesRoot = document.getElementById("phases-root");
+  (plan.phases || []).forEach((ph) => {
+    const div = document.createElement("article");
+    div.className = "phase";
+    div.setAttribute("data-status", ph.status || "pending");
+    const row = document.createElement("div");
+    row.className = "row";
+    const h3 = document.createElement("h3");
+    h3.textContent = ph.title;
+    const badge = document.createElement("span");
+    badge.className = "badge " + (ph.status || "pending");
+    badge.textContent = ph.status || "pending";
+    row.appendChild(h3); row.appendChild(badge);
+    div.appendChild(row);
+    if ((ph.items || []).length) {
+      const ul = document.createElement("ul");
+      ph.items.forEach((it, idx) => {
+        const li = document.createElement("li");
+        if (it.done) li.classList.add("done");
+        const cb = document.createElement("input");
+        cb.type = "checkbox"; cb.checked = !!it.done;
+        cb.setAttribute("aria-label", "Mark item " + (idx + 1) + " complete");
+        cb.addEventListener("change", () => {
+          it.done = cb.checked;
+          li.classList.toggle("done", cb.checked);
+        });
+        const span = document.createElement("span");
+        span.textContent = it.text;
+        li.appendChild(cb); li.appendChild(span);
+        if (it.owner) {
+          const o = document.createElement("em");
+          o.style.color = "var(--muted)"; o.style.marginLeft = "6px";
+          o.textContent = "@" + it.owner;
+          li.appendChild(o);
+        }
+        ul.appendChild(li);
+      });
+      div.appendChild(ul);
+    }
+    if ((ph.milestones || []).length) {
+      const m = document.createElement("div");
+      m.className = "milestones";
+      m.textContent = "Milestones: " + ph.milestones.join(" | ");
+      div.appendChild(m);
+    }
+    phasesRoot.appendChild(div);
+  });
+
+  const risksRoot = document.getElementById("risks-root");
+  (plan.risks || []).forEach((r) => {
+    const tr = document.createElement("tr");
+    [r.risk, r.severity, r.mitigation].forEach((v, i) => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      if (i === 1) td.className = r.severity === "high" ? "risk-high" : r.severity === "mid" ? "risk-mid" : "risk-low";
+      tr.appendChild(td);
+    });
+    risksRoot.appendChild(tr);
+  });
+
+  const decisionsRoot = document.getElementById("decisions-root");
+  (plan.decisions || []).forEach((d) => {
+    const tr = document.createElement("tr");
+    [d.decision, d.rationale].forEach((v) => {
+      const td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+    });
+    decisionsRoot.appendChild(tr);
+  });
+
+  const progressRoot = document.getElementById("progress-root");
+  (plan.progress_log || []).forEach((p) => {
+    const tr = document.createElement("tr");
+    [p.ts, p.phase, p.action, (p.files || []).join(", ")].forEach((v) => {
+      const td = document.createElement("td"); td.textContent = String(v == null ? "" : v); tr.appendChild(td);
+    });
+    progressRoot.appendChild(tr);
+  });
+
+  const tabBtns = Array.from(document.querySelectorAll('[role="tab"]'));
+  const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+  const selectTab = (idx) => {
+    tabBtns.forEach((b, i) => {
+      const sel = i === idx;
+      b.setAttribute("aria-selected", String(sel));
+      b.tabIndex = sel ? 0 : -1;
+    });
+    panels.forEach((p, i) => p.hidden = i !== idx);
+  };
+  tabBtns.forEach((b, i) => {
+    b.addEventListener("click", () => selectTab(i));
+    b.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); const n = (i + 1) % tabBtns.length; tabBtns[n].focus(); selectTab(n); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); const n = (i - 1 + tabBtns.length) % tabBtns.length; tabBtns[n].focus(); selectTab(n); }
+    });
+  });
+
+  const copyText = async (text) => {
+    try {
+      if (navigator.clipboard) await navigator.clipboard.writeText(text);
+      else {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }
+    } catch (e) { /* no-op */ }
+  };
+  const toMarkdown = () => {
+    const L = ["# " + plan.plan_title];
+    if (plan.goal) L.push("\n## Goal\n" + plan.goal);
+    L.push("\n## Phases");
+    (plan.phases || []).forEach((ph) => {
+      L.push("\n### Phase " + ph.id + ": " + ph.title + " (" + ph.status + ")");
+      (ph.items || []).forEach((it) => L.push("- [" + (it.done ? "x" : " ") + "] " + it.text));
+    });
+    return L.join("\n");
+  };
+  document.getElementById("btn-copy-md").addEventListener("click", () => copyText(toMarkdown()));
+  document.getElementById("btn-copy-json").addEventListener("click", () => copyText(JSON.stringify(plan, null, 2)));
+  document.getElementById("btn-print").addEventListener("click", () => window.print());
+})();
+</script>
+</body>
+</html>

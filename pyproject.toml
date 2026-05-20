@@ -1,0 +1,14 @@
+[project]
+name = "plan-it"
+version = "0.1.0"
+description = "HTML-first persistent planning skill for Claude Code"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "OthmanAdi" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = ["ignore::DeprecationWarning"]
+pythonpath = ["tests", "scripts"]

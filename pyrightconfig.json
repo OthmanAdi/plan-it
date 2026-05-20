@@ -1,0 +1,6 @@
+{
+  "include": ["scripts", "tests"],
+  "extraPaths": ["tests", "scripts"],
+  "pythonVersion": "3.10",
+  "reportMissingImports": "none"
+}

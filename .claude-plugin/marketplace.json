@@ -1,0 +1,12 @@
+{
+  "name": "plan-it",
+  "version": "0.1.0",
+  "owner": "OthmanAdi",
+  "description": "HTML-first persistent planning skill for Claude Code. Single self-contained plan.html, embedded JSON state, drag-cards, sliders, copy-as-markdown, SHA-256 tamper attestation, multi-IDE mirrors.",
+  "plugins": [
+    {
+      "name": "plan-it",
+      "source": "."
+    }
+  ]
+}
