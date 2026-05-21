@@ -256,6 +256,7 @@
     <div class="meta" id="plan-meta">template: animation-sandbox</div>
   </div>
   <div class="actions" role="group" aria-label="Animation actions">
+    <button type="button" id="btn-save" aria-label="Save plan.html to disk">Save</button>
     <button type="button" id="btn-copy-css" aria-label="Copy as CSS @keyframes block">Copy as CSS</button>
     <button type="button" id="btn-copy-json" aria-label="Copy animation data as JSON">Copy as JSON</button>
     <button type="button" id="btn-print" aria-label="Print sandbox">Print</button>
@@ -561,8 +562,14 @@
   // Play / loop
   let loop = false;
   const target = document.getElementById("target");
-  const styleEl = document.createElement("style");
-  document.head.appendChild(styleEl);
+  // Stable id keeps re-opens of a Saved file from stacking duplicate style blocks.
+  const STYLE_ID = "anim-runtime-style";
+  let styleEl = document.getElementById(STYLE_ID);
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = STYLE_ID;
+    document.head.appendChild(styleEl);
+  }
 
   const keyframesCSS = () => {
     const name = "kf-" + (anim.name || "anim").replace(/[^a-zA-Z0-9_-]/g, "");
@@ -652,6 +659,48 @@
   document.getElementById("btn-export-json").addEventListener("click", () => copyText(JSON.stringify(anim, null, 2)));
   document.getElementById("btn-copy-json").addEventListener("click", () => copyText(JSON.stringify(plan, null, 2)));
   document.getElementById("btn-print").addEventListener("click", () => window.print());
+  document.getElementById("btn-save").addEventListener("click", savePlanHtml);
+
+  function flashSaved(btn, msg) {
+    const orig = btn.dataset.origLabel || btn.textContent;
+    btn.dataset.origLabel = orig;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }
+
+  async function savePlanHtml() {
+    const btn = document.getElementById("btn-save");
+    // Escape '<' to prevent any '</script>' in user-typed strings from
+    // terminating the embedded JSON block on reload. JSON.parse round-trips '<' to '<'.
+    dataEl.textContent = JSON.stringify(plan, null, 2).replace(/</g, "\\u003c");
+    const html = "<!doctype html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    if (window.showSaveFilePicker) {
+      try {
+        if (!window.__planFileHandle) {
+          window.__planFileHandle = await window.showSaveFilePicker({
+            suggestedName: "plan.html",
+            types: [{ description: "plan-it HTML plan", accept: { "text/html": [".html"] } }],
+          });
+        }
+        const writable = await window.__planFileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        flashSaved(btn, "Saved");
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "plan.html";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    flashSaved(btn, "Downloaded");
+  }
 })();
 </script>
 </body>

@@ -11,8 +11,8 @@
 npx skills add OthmanAdi/plan-it
 ```
 
-[![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)](https://github.com/OthmanAdi/plan-it/releases)
-[![Tests](https://img.shields.io/badge/tests-120%2F120_green-brightgreen)](tests/)
+[![Version](https://img.shields.io/badge/version-0.1.1-brightgreen)](https://github.com/OthmanAdi/plan-it/releases)
+[![Tests](https://img.shields.io/badge/tests-172%2F172_green-brightgreen)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://code.claude.com/docs/en/plugins)
 [![17 IDEs](https://img.shields.io/badge/IDEs-17-orange)](#supported-platforms-17)

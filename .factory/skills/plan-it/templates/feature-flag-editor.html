@@ -245,6 +245,7 @@
     <div class="meta" id="plan-meta">template: feature-flag-editor</div>
   </div>
   <div class="actions" role="group" aria-label="Editor actions">
+    <button type="button" id="btn-save" aria-label="Save plan.html to disk">Save</button>
     <button type="button" id="btn-copy-diff" aria-label="Copy changed flags as diff">Copy diff</button>
     <button type="button" id="btn-copy-json" aria-label="Copy full plan-data as JSON">Copy as JSON</button>
     <button type="button" id="btn-reset" aria-label="Reset all flags to loaded snapshot">Reset</button>
@@ -736,6 +737,48 @@
   document.getElementById("btn-copy-diff").addEventListener("click", () => copyText(toDiff()));
   document.getElementById("btn-copy-json").addEventListener("click", () => copyText(JSON.stringify(plan, null, 2)));
   document.getElementById("btn-print").addEventListener("click", () => window.print());
+  document.getElementById("btn-save").addEventListener("click", savePlanHtml);
+
+  function flashSaved(btn, msg) {
+    const orig = btn.dataset.origLabel || btn.textContent;
+    btn.dataset.origLabel = orig;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }
+
+  async function savePlanHtml() {
+    const btn = document.getElementById("btn-save");
+    // Escape '<' to prevent any '</script>' in user-typed strings from
+    // terminating the embedded JSON block on reload. JSON.parse round-trips '<' to '<'.
+    dataEl.textContent = JSON.stringify(plan, null, 2).replace(/</g, "\\u003c");
+    const html = "<!doctype html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    if (window.showSaveFilePicker) {
+      try {
+        if (!window.__planFileHandle) {
+          window.__planFileHandle = await window.showSaveFilePicker({
+            suggestedName: "plan.html",
+            types: [{ description: "plan-it HTML plan", accept: { "text/html": [".html"] } }],
+          });
+        }
+        const writable = await window.__planFileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        flashSaved(btn, "Saved");
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "plan.html";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    flashSaved(btn, "Downloaded");
+  }
   document.getElementById("btn-reset").addEventListener("click", () => {
     // Restore in-place to keep snapshot/groups pointer identity (eachFlag uses groups).
     snapshot.forEach((sg, gi) => {

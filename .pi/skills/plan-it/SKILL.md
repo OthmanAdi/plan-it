@@ -28,7 +28,7 @@ hooks:
         - type: command
           command: "if [ -f plan.html ]; then echo '[plan-it] PreCompact: context compaction about to occur.'; echo 'Before compaction completes: ensure plan.html embedded JSON captures recent progress_log entries and current_phase status.'; echo 'plan.html remains on disk and will be re-read after compaction.'; PY=$(command -v python3 || command -v python); HELPER=\"${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/skills/plan-it}/scripts/plan-hook.py\"; if [ -z \"$PY\" ] || [ ! -f \"$HELPER\" ]; then HELPER=$(ls \"$HOME/.claude/skills/plan-it/scripts/plan-hook.py\" \"$HOME/.claude/plugins/marketplaces/plan-it/scripts/plan-hook.py\" 2>/dev/null | head -1); fi; if [ -n \"$PY\" ] && [ -n \"$HELPER\" ] && [ -f \"$HELPER\" ]; then \"$PY\" \"$HELPER\" attestation; fi; fi; exit 0"
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # plan-it
@@ -79,15 +79,16 @@ plan.html      = the canonical surface — visual to humans, structured to agent
 
 The JSON data layer travels everywhere. The render layer is the human's UX.
 
-## Plan-data JSON schema (v0.1.0)
+## Plan-data JSON schema (v0.1.1)
 
 ```json
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.1.1",
   "plan_title": "...",
   "goal": "...",
   "current_phase": 1,
   "template": "implementation-plan",
+  "ownership": "agent",
   "created_at": "ISO 8601",
   "updated_at": "ISO 8601",
   "phases": [
@@ -107,6 +108,8 @@ The JSON data layer travels everywhere. The render layer is the human's UX.
 }
 ```
 
+`ownership` is optional, default unset. Accepts `"agent"`, `"user"`, or `"shared"`. v0.1.1 documents the field for forward-compat; v0.2.0 will gate UI affordances on it. Plan authors can start tagging plans now without breaking back-compat.
+
 ## Available commands
 
 | Command | What it does |
@@ -119,6 +122,17 @@ The JSON data layer travels everywhere. The render layer is the human's UX.
 | `/plan-export json` | Export the embedded JSON to plan.json |
 | `/plan-goal` | Compose with Claude Code's `/goal` — derive termination condition |
 | `/plan-loop` | Compose with Claude Code's `/loop` — re-read on every tick |
+
+## In-browser Save (v0.1.1)
+
+Six interactive templates (implementation-plan, annotated-pr, feature-flag-editor, incident-timeline, animation-sandbox, ticket-triage) ship a **Save** button in the header. Clicking it writes the current plan state back to disk:
+
+- **Chromium browsers** (Chrome, Edge, Opera, Brave) use the File System Access API. First click opens a file picker; subsequent saves overwrite the same handle in place. No download dialog.
+- **Firefox, Safari, and FSA-disabled environments** fall back to downloading a replacement `plan.html` into the browser's default download directory. Move the file into the project root to replace the original.
+
+Before serializing, the handler pushes the in-memory `plan` object into the embedded `<script type="application/json" id="plan-data">` block so the saved file carries the new state. The render layer clears its containers on every page load, so re-opening a saved file does not double-render the cards baked into the serialized DOM. After a Save, the agent can re-read `plan.html` and see the user's edits.
+
+The four pure display/export templates (living-design-system, module-map, three-approaches, weekly-status) do not need Save: they have no state to persist.
 
 ## Critical rules
 
@@ -165,7 +179,7 @@ Every plan.html ships:
 - `<script>` inline — vanilla JS renderer, ≤400 lines
 - WCAG AA contrast, ARIA labels, semantic landmarks, keyboard navigation
 - No `<link rel="stylesheet">`, no `<script src>`, no `eval`, no `Function()`, no remote URLs
-- Total size budget: ≤30KB HTML + ≤50KB JSON
+- Total size budget: ≤35KB HTML + ≤50KB JSON (raised from 30KB in v0.1.1 to absorb the inline Save handler)
 
 ## Security boundary
 
@@ -179,6 +193,7 @@ If you already use planning-with-files (the markdown predecessor at https://gith
 
 ## Gotchas
 
+- **In-browser edits do not appear in the file until you click Save.** v0.1.0 and earlier had no save path: writes happened in memory only, vanished on reload. v0.1.1 fixes this with the Save button. If you do not see your edits in `plan.html` on disk, click Save first; on Firefox/Safari, move the downloaded file into the project root.
 - **Hook fires but no plan.html exists in cwd.** Behavior: silent exit 0. Hooks check first.
 - **You edited plan.html directly and the render is now broken.** Behavior: restore from git or run `/plan-attest --clear && /plan` to re-init. Do not hand-edit HTML tags.
 - **JSON is in a `<script type="application/json">` block, not raw HTML.** Most editors will syntax-highlight it correctly if you set the line `<script type="application/json">` first.

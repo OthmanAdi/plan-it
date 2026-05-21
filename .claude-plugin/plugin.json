@@ -1,6 +1,6 @@
 {
   "name": "plan-it",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HTML-first persistent planning skill. Single self-contained plan.html with interactive phases, drag-and-drop, sliders, mockups, copy-as-markdown export, embedded JSON state. Survives /clear via session catchup. Tamper-protected by SHA-256. Mirrors across 17 IDEs.",
   "author": {
     "name": "OthmanAdi",
