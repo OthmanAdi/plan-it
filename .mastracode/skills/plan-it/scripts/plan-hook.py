@@ -30,6 +30,36 @@ DATA_BLOCK_RE = re.compile(
     re.DOTALL,
 )
 
+# Hard caps to keep injected hook output bounded regardless of plan size.
+MAX_TITLE = 200
+MAX_GOAL = 400
+MAX_ITEM_TEXT = 200
+MAX_ACTION_TEXT = 200
+MAX_FIELD = 200
+ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+INJECTION_MARKER_RE = re.compile(r"={3,}\s*(BEGIN|END)\s+PLAN\s+DATA\s*={3,}", re.IGNORECASE)
+
+
+def _sanitize(value: Any, *, cap: int = MAX_FIELD, single_line: bool = True) -> str:
+    """Defang user-supplied strings before they enter the agent context.
+
+    Strips ANSI escapes and most control chars, neutralizes the injection
+    bracketing markers a malicious plan author might embed to break out of
+    the data block, folds newlines when caller wants a single line, and
+    truncates to `cap` bytes. Non-string values are coerced.
+    """
+    if value is None:
+        return ""
+    s = value if isinstance(value, str) else str(value)
+    s = ANSI_RE.sub("", s)
+    s = "".join(ch for ch in s if ch in ("\t", "\n") or ord(ch) >= 32)
+    if single_line:
+        s = s.replace("\r", " ").replace("\n", " ")
+    s = INJECTION_MARKER_RE.sub(lambda m: m.group(0).replace("=", "_"), s)
+    if len(s) > cap:
+        s = s[: cap - 1] + "…"
+    return s
+
 
 def _resolve_plan_path() -> Path | None:
     """Resolve the active plan path with PLAN_ID + .active_plan + legacy fallback."""
@@ -104,46 +134,52 @@ def _emit_attestation_status(plan_path: Path) -> tuple[bool, str | None, str | N
 
 
 def _summarize(plan: dict[str, Any], lines_budget: int, mode: str) -> list[str]:
-    """Build a compact textual summary of the plan-data."""
+    """Build a compact textual summary of the plan-data.
+
+    Every user-supplied string passes through _sanitize() to defang ANSI
+    escapes, control characters, and the BEGIN/END PLAN DATA bracketing
+    markers (which a malicious plan author could otherwise use to break out
+    of the data block on the agent side).
+    """
     out: list[str] = []
-    title = plan.get("plan_title") or "(untitled plan)"
-    goal = plan.get("goal") or ""
-    template = plan.get("template") or "(custom)"
-    current = plan.get("current_phase")
+    title = _sanitize(plan.get("plan_title") or "(untitled plan)", cap=MAX_TITLE)
+    goal = _sanitize(plan.get("goal") or "", cap=MAX_GOAL)
+    template = _sanitize(plan.get("template") or "(custom)", cap=80)
+    current = _sanitize(plan.get("current_phase"), cap=20)
     phases = plan.get("phases") or []
     out.append(f"plan_title: {title}")
     if goal:
-        out.append(f"goal: {goal[:200]}")
+        out.append(f"goal: {goal}")
     out.append(f"template: {template}")
     out.append(f"current_phase: {current}")
     out.append(f"phases_total: {len(phases)}")
     if mode == "active-phase":
         active = next(
-            (p for p in phases if p.get("id") == current),
+            (p for p in phases if p.get("id") == plan.get("current_phase")),
             phases[0] if phases else None,
         )
         if active:
             out.append("--- active phase ---")
-            out.append(f"  id: {active.get('id')}")
-            out.append(f"  title: {active.get('title')}")
-            out.append(f"  status: {active.get('status')}")
+            out.append(f"  id: {_sanitize(active.get('id'), cap=20)}")
+            out.append(f"  title: {_sanitize(active.get('title'), cap=MAX_TITLE)}")
+            out.append(f"  status: {_sanitize(active.get('status'), cap=20)}")
             for it in (active.get("items") or [])[: max(1, lines_budget - len(out))]:
                 done = "[x]" if it.get("done") else "[ ]"
-                out.append(f"  {done} {it.get('text', '')[:120]}")
+                out.append(f"  {done} {_sanitize(it.get('text', ''), cap=MAX_ITEM_TEXT)}")
         return out[:lines_budget]
     # summary mode: list all phases briefly + last few progress entries
     out.append("--- phases ---")
     for p in phases:
-        marker = "*" if p.get("id") == current else " "
-        out.append(
-            f"  {marker} [{p.get('status', '?'):11s}] phase {p.get('id')}: {p.get('title', '')[:80]}"
-        )
+        marker = "*" if p.get("id") == plan.get("current_phase") else " "
+        status = _sanitize(p.get("status", "?"), cap=11)
+        ptitle = _sanitize(p.get("title", ""), cap=80)
+        out.append(f"  {marker} [{status:11s}] phase {_sanitize(p.get('id'), cap=10)}: {ptitle}")
     progress = plan.get("progress_log") or []
     if progress:
         out.append("--- recent progress ---")
         for entry in progress[-3:]:
-            ts = entry.get("ts", "")
-            action = entry.get("action", "")[:120]
+            ts = _sanitize(entry.get("ts", ""), cap=40)
+            action = _sanitize(entry.get("action", ""), cap=MAX_ACTION_TEXT)
             out.append(f"  {ts} :: {action}")
     return out[:lines_budget]
 

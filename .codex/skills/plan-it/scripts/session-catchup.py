@@ -2,17 +2,29 @@
 """session-catchup.py — detect unsynced plan-it edits from prior IDE sessions.
 
 Parses session storage from:
-  - Claude Code: ~/.claude/projects/<slug>/*.jsonl
-  - OpenCode: ${XDG_DATA_HOME:-~/.local/share}/opencode/opencode.db (SQLite)
-  - Codex: ~/.codex/sessions/*.json (best-effort)
+  - Claude Code: ~/.claude/projects/<slug>/*.jsonl   (mtime only, no content read)
+  - OpenCode:   ${XDG_DATA_HOME:-~/.local/share}/opencode/opencode.db
+                (SQLite opened with mode=ro, single SELECT for id + time_created,
+                 no message bodies)
+  - Codex:      ~/.codex/sessions/*.json
+                (capped at the 10 most recent files, each read up to 256 KB only,
+                 parsed solely to match the `cwd` field; no other fields surfaced)
 
-Looks at modification timestamps. If a session edited plan.html or .planning/<slug>/plan.html
-more recently than the local file, surfaces a catchup report.
+Looks at modification timestamps. If a session edited plan.html or
+.planning/<slug>/plan.html more recently than the local file, surfaces a
+catchup report.
+
+Nothing leaves the machine. All access is local and read-only. No data is
+written anywhere. No network calls.
+
+To opt out entirely, set `PLANIT_NO_HISTORY=1` in the environment or pass
+`--no-history`. The script exits 0 with no output.
 
 Designed for invocation in SKILL.md first-step "Restore Context" block.
 
 Usage:
   python scripts/session-catchup.py <project-cwd>
+  python scripts/session-catchup.py --no-history <project-cwd>
 """
 from __future__ import annotations
 
@@ -89,6 +101,9 @@ def _opencode_catchup(cwd: Path) -> list[str]:
     return out
 
 
+CODEX_READ_CAP = 256 * 1024  # bytes; bound how much of any one session file we touch
+
+
 def _codex_catchup(cwd: Path) -> list[str]:
     out: list[str] = []
     codex_dir = Path.home() / ".codex" / "sessions"
@@ -98,8 +113,10 @@ def _codex_catchup(cwd: Path) -> list[str]:
     cwd_str = str(cwd)
     for f in files[:10]:
         try:
-            data = json.loads(f.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+            with f.open("rb") as fh:
+                blob = fh.read(CODEX_READ_CAP)
+            data = json.loads(blob.decode("utf-8", errors="replace"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
             continue
         if isinstance(data, dict) and data.get("cwd") == cwd_str:
             age_min = (time.time() - f.stat().st_mtime) / 60
@@ -111,11 +128,19 @@ def _codex_catchup(cwd: Path) -> list[str]:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("cwd", nargs="?", default=".", help="Project working directory")
+    parser.add_argument(
+        "--no-history",
+        action="store_true",
+        help="Skip all session-store reads. Same as PLANIT_NO_HISTORY=1.",
+    )
     args = parser.parse_args(argv)
     cwd = Path(args.cwd).resolve()
 
     plan_present = (cwd / "plan.html").is_file() or (cwd / ".planning" / ".active_plan").is_file()
     if not plan_present:
+        return 0
+
+    if args.no_history or os.environ.get("PLANIT_NO_HISTORY", "").strip() in ("1", "true", "yes"):
         return 0
 
     lines: list[str] = []
