@@ -158,6 +158,7 @@
     <div class="meta" id="plan-meta">template: implementation-plan</div>
   </div>
   <div class="actions" role="group" aria-label="Plan actions">
+    <button type="button" id="btn-save" aria-label="Save plan.html to disk">Save</button>
     <button type="button" id="btn-copy-md" aria-label="Copy plan as Markdown">Copy as Markdown</button>
     <button type="button" id="btn-copy-json" aria-label="Copy plan-data as JSON">Copy as JSON</button>
     <button type="button" id="btn-print" aria-label="Print plan">Print</button>
@@ -320,8 +321,10 @@
     document.getElementById("footer-sha").textContent = "Plan-SHA256: " + plan.attestation_sha256;
   }
 
-  // Phases
+  // Render containers — clear before populate so re-opens of a Saved file
+  // do not double-render the cards baked into the serialized DOM.
   const phasesRoot = document.getElementById("phases-root");
+  phasesRoot.replaceChildren();
   (plan.phases || []).forEach((ph) => {
     const div = document.createElement("article");
     div.className = "phase";
@@ -382,6 +385,7 @@
 
   // Mockups
   const mocksRoot = document.getElementById("mockups-root");
+  mocksRoot.replaceChildren();
   (plan.mockups || []).forEach((m) => {
     const wrap = document.createElement("div");
     wrap.className = "mock";
@@ -398,6 +402,7 @@
 
   // Risks
   const risksRoot = document.getElementById("risks-root");
+  risksRoot.replaceChildren();
   (plan.risks || []).forEach((r) => {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td"); td1.textContent = r.risk || "";
@@ -411,6 +416,7 @@
 
   // Decisions
   const decisionsRoot = document.getElementById("decisions-root");
+  decisionsRoot.replaceChildren();
   (plan.decisions || []).forEach((d) => {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td"); td1.textContent = d.decision || "";
@@ -421,6 +427,7 @@
 
   // Progress
   const progressRoot = document.getElementById("progress-root");
+  progressRoot.replaceChildren();
   (plan.progress_log || []).forEach((p) => {
     const tr = document.createElement("tr");
     ["ts", "phase", "action"].forEach((k) => {
@@ -506,11 +513,57 @@
   document.getElementById("btn-copy-md").addEventListener("click", () => copyText(toMarkdown()));
   document.getElementById("btn-copy-json").addEventListener("click", () => copyText(JSON.stringify(plan, null, 2)));
   document.getElementById("btn-print").addEventListener("click", () => window.print());
+  document.getElementById("btn-save").addEventListener("click", savePlanHtml);
 
-  // Append-only edit hook: when a checkbox is flipped, update timestamp.
-  // Note: writes happen in-memory only. To persist, copy-as-JSON and paste back into the source block.
   function touch() {
     plan.updated_at = new Date().toISOString();
+  }
+
+  function flashSaved(btn, msg) {
+    const orig = btn.dataset.origLabel || btn.textContent;
+    btn.dataset.origLabel = orig;
+    btn.textContent = msg;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }
+
+  async function savePlanHtml() {
+    const btn = document.getElementById("btn-save");
+    // Push current state into the embedded data block so serialized HTML carries it.
+    dataEl.textContent = JSON.stringify(plan, null, 2);
+    const html = "<!doctype html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+
+    // File System Access API (Chromium): overwrite in place after first picker.
+    if (window.showSaveFilePicker) {
+      try {
+        if (!window.__planFileHandle) {
+          window.__planFileHandle = await window.showSaveFilePicker({
+            suggestedName: "plan.html",
+            types: [{ description: "plan-it HTML plan", accept: { "text/html": [".html"] } }],
+          });
+        }
+        const writable = await window.__planFileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        flashSaved(btn, "Saved");
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+        // fall through to download fallback
+      }
+    }
+
+    // Download fallback (Firefox, Safari): user moves the file into the project.
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "plan.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    flashSaved(btn, "Downloaded");
   }
 })();
 </script>

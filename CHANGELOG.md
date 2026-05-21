@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-05-21
+
+### Fixed
+
+- **Browser edits to checkboxes, sliders, and drag-cards no longer vanish on reload.** Six interactive templates (implementation-plan, annotated-pr, feature-flag-editor, incident-timeline, animation-sandbox, ticket-triage) now ship a Save button in the header. Chromium-based browsers overwrite `plan.html` in place via the File System Access API after the first picker selection; Firefox and Safari fall back to downloading a replacement copy. The pre-0.1.1 comment claiming "writes happen in-memory only" was the artifact of an unfinished save path. It is now actually saved.
+- Render roots clear their containers before populate. Re-opening a saved file no longer double-renders the cards baked into the serialized DOM. The animation-sandbox additionally pins its dynamic style block to a stable id so reloads do not stack duplicate keyframes.
+
+### Added
+
+- Optional `ownership` field in the plan-data schema. Accepts `"agent"`, `"user"`, or `"shared"`. Reserved for v0.2.0 behavior, documented now so plan authors can start tagging plans without breaking back-compat.
+- 51 pytest assertions in `tests/test_save_handler.py` covering Save button presence, FSA-then-fallback ordering, write-back into the embedded JSON block, idempotency markers, the 35KB single-file budget, and that the four pure display templates (living-design-system, module-map, three-approaches, weekly-status) do NOT advertise Save.
+
+### Changed
+
+- Single-file size budget raised from 30KB to 35KB to absorb the inline Save handler. JSON budget unchanged at 50KB. Two templates (annotated-pr, module-map) were already at or near 30KB. The new ceiling reflects measured reality.
+
+### Thanks
+
+- planning-with-files for the parity-locked bumper that made the 13-SKILL.md sweep safe.
+
 ## [0.1.0] - 2026-05-20
 
 ### Added
