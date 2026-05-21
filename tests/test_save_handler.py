@@ -62,6 +62,22 @@ def test_save_handler_writes_back_into_data_block(name):
     )
 
 
+@pytest.mark.parametrize("name", TEMPLATES_WITH_SAVE)
+def test_save_handler_escapes_script_close(name):
+    """JSON.stringify does not escape '<', so a user typing '</script>' into
+    any string field would terminate the embedded script block on reload AND
+    open an injection surface. Save handler must escape '<' as the literal
+    six-character sequence backslash-u-0-0-3-c before write-back."""
+    t = _read(name)
+    # File on disk should contain the JS source literal: .replace(/</g, "<")
+    # which is two characters (backslash + backslash) followed by u003c in the file.
+    needle = '.replace(/</g, "\\\\u003c")'
+    assert needle in t, (
+        f"{name} Save handler must contain {needle!r} to escape '<' "
+        f"and prevent premature </script> close on reload"
+    )
+
+
 @pytest.mark.parametrize("name", TEMPLATES_WITHOUT_SAVE)
 def test_pure_display_templates_have_no_save(name):
     t = _read(name)

@@ -592,7 +592,9 @@
 
   async function savePlanHtml() {
     const btn = document.getElementById("btn-save");
-    dataEl.textContent = JSON.stringify(plan, null, 2);
+    // Escape '<' to prevent any '</script>' in user-typed strings from
+    // terminating the embedded JSON block on reload. JSON.parse round-trips '<' to '<'.
+    dataEl.textContent = JSON.stringify(plan, null, 2).replace(/</g, "\\u003c");
     const html = "<!doctype html>\n" + document.documentElement.outerHTML;
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     if (window.showSaveFilePicker) {
