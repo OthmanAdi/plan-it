@@ -16,7 +16,7 @@ plan-it is a Claude Code skill that produces a single self-contained HTML plan f
 ## IDE mirrors
 
 11 IDE adapter folders contain SKILL.md variants with the IDE-specific frontmatter shape but byte-identical scripts and templates:
-`.codex/`, `.cursor/`, `.codebuddy/`, `.factory/`, `.mastracode/`, `.opencode/`, `.hermes/`, `.continue/`, `.gemini/`, `.kiro/`, `.pi/`, plus `clawhub-upload/` for the ClawHub manual-upload bundle.
+`.codex/`, `.cursor/`, `.codebuddy/`, `.factory/`, `.mastracode/`, `.opencode/`, `.hermes/`, `.continue/`, `.gemini/`, `.kiro/`, `.pi/`.
 
 ## Language variants
 

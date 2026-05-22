@@ -47,3 +47,6 @@ bash.exe.stackdump
 
 # Local agent state
 .claude/
+
+# ClawHub upload bundle - kept locally for hand-uploads, never in repo
+clawhub-upload/
