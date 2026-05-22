@@ -2,11 +2,11 @@
 
 ## Lead
 
-- **Ahmad Othman Ammar Adi** (@OthmanAdi) — Author, maintainer, and release manager.
+- **Ahmad Othman Ammar Adi** (@OthmanAdi), Author, maintainer, and release manager.
 
 ## Lineage
 
-- **planning-with-files** (OthmanAdi) — The markdown-era predecessor. plan-it inherits its hook lifecycle, session catchup, SHA-256 attestation, parity-locked version bumper, and 17-IDE adapter distribution.
+- **planning-with-files** (OthmanAdi), The markdown-era predecessor. plan-it inherits its hook lifecycle, session catchup, SHA-256 attestation, parity-locked version bumper, and 17-IDE adapter distribution.
 
 ## Reporters
 

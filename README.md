@@ -5,14 +5,14 @@
 # plan-it
 
 > **Stop reading walls of markdown. Start *seeing* your plan.**
-> The first HTML-first planning skill for Claude Code, Cursor, and 15 other agents. One file. Survives `/clear`. SHA-256 attested. Built in the publication window of Thariq Shihipar's "HTML is the new markdown."
+> An HTML-first planning skill for Claude Code, Cursor, and 15 other agents. One file. Survives `/clear`. SHA-256 attested.
 
 ```
 npx skills add OthmanAdi/plan-it
 ```
 
 [![Version](https://img.shields.io/badge/version-0.1.1-brightgreen)](https://github.com/OthmanAdi/plan-it/releases)
-[![Tests](https://img.shields.io/badge/tests-172%2F172_green-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-207%2F207_green-brightgreen)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://code.claude.com/docs/en/plugins)
 [![17 IDEs](https://img.shields.io/badge/IDEs-17-orange)](#supported-platforms-17)
@@ -60,7 +60,7 @@ Plus a CLI to bring them up: `/plan`, `/plan-render`, `/plan-attest`, `/plan-sta
 
 > "The format the agent emits is the control surface the human inspects, not a wrapper around it."
 
-With Opus 4.7 at 1M tokens, the cost argument for markdown is dead. The constraint that's left is engagement. A plan only matters if it gets read. HTML preserves spatial layout, interactivity, comparisons, mockups — all the things markdown linearizes away.
+With Opus 4.7 at 1M tokens, the cost argument for markdown is dead. The constraint that's left is engagement. A plan only matters if it gets read. HTML preserves spatial layout, interactivity, comparisons, mockups, all the things markdown linearizes away.
 
 plan-it is the persistent skill for that thesis. Web-artifacts-builder makes one-shot artifacts. Playground makes throwaway tools. Frontend-design produces components. None of them survive `/clear`. None mirror to 17 IDEs. None ship SHA-256 attestation. plan-it does all three.
 
@@ -77,12 +77,12 @@ plan-it is the persistent skill for that thesis. Web-artifacts-builder makes one
 | Single-file offline (no CDN) | yes |
 | Bidirectional Markdown export | yes |
 | Parity-locked version bumper across IDE mirrors | yes |
-| Pytest coverage | 120 green |
+| Pytest coverage | 207 green |
 
 ## The thesis we ship on
 
 > "HTML is the new markdown. I've stopped writing markdown files for almost everything and switched to using Claude Code to generate HTML for me."  
-> — [Thariq Shihipar](https://x.com/trq212/status/2052811606032269638), Anthropic engineer
+> [Thariq Shihipar](https://x.com/trq212/status/2052811606032269638), Anthropic engineer
 
 plan-it is the persistent, multi-IDE planning skill for the era that line opened.
 
@@ -127,7 +127,7 @@ The browser opens. The plan is live. Drag a card. Toggle a checkbox. Click **Cop
 
 Want it locked? `bash scripts/attest-plan.sh`. Now any byte change to `plan.html` blocks hook injection until you re-attest. Trust boundary on disk.
 
-Want it back as text? `python scripts/export-markdown.py`. You get `task_plan.md`, `findings.md`, `progress.md` — exact same shape as planning-with-files. Hand-edit anywhere.
+Want it back as text? `python scripts/export-markdown.py`. You get `task_plan.md`, `findings.md`, `progress.md`, exact same shape as planning-with-files. Hand-edit anywhere.
 
 ## Architecture
 
@@ -143,7 +143,7 @@ plan.html = <style> + <script type=application/json id=plan-data> + <script>
 
 JSON is the source of truth. The render layer is derived. Diffs are clean. The agent reads the JSON. The human sees the dashboard.
 
-Hooks re-inject the active phase on every prompt with `===BEGIN PLAN DATA===` markers (never `---`, because that breaks Claude Code's skill loader — [carried lesson from planning-with-files v2.38.1](https://github.com/OthmanAdi/planning-with-files/releases/tag/v2.38.1)).
+Hooks re-inject the active phase on every prompt with `===BEGIN PLAN DATA===` markers (never `---`, because that breaks Claude Code's skill loader, [carried lesson from planning-with-files v2.38.1](https://github.com/OthmanAdi/planning-with-files/releases/tag/v2.38.1)).
 
 ## Round-trip with markdown
 
@@ -155,11 +155,11 @@ For chained agents, git-committed specs, or anyone who wants source text back, `
 
 ## Token-cost honesty
 
-HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M context that's nothing. For chained agents or git-committed specs, run `/plan-export markdown` — the JSON round-trips clean to three planning-with-files-compatible files.
+HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M context that's nothing. For chained agents or git-committed specs, run `/plan-export markdown`, the JSON round-trips clean to three planning-with-files-compatible files.
 
 ## Built on the shoulders of
 
-- **planning-with-files** ([OthmanAdi](https://github.com/OthmanAdi/planning-with-files), 21,681 stars) — the markdown predecessor. Hook lifecycle, session catchup, SHA-256 attestation, parity-locked bumper, 17-IDE distribution all carry over to plan-it.
+- **planning-with-files** ([OthmanAdi](https://github.com/OthmanAdi/planning-with-files), 21,681 stars), the markdown predecessor. Hook lifecycle, session catchup, SHA-256 attestation, parity-locked bumper, 17-IDE distribution all carry over to plan-it.
 
 ## Status
 
