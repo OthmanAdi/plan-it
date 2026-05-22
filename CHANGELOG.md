@@ -2,10 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] - 2026-05-21
+## [0.1.1] - 2026-05-22
 
 ### Fixed
 
+- **Tabs and full page render in generated `plan.html` (issue #3).** The save handler shipped in this version carried a JavaScript comment that contained the literal string `</script>`. HTML parses `<script>` content in raw-text mode and treats the first `</script` sequence as the end-tag, regardless of whether it sits inside a JS comment or string. The result: every line after that comment was discarded by the parser, including the tab-switching logic and event listeners. Page rendered with the default title, tabs were inert, console showed `Uncaught SyntaxError: Unexpected end of input`. The comment is rewritten to convey the same intent without the trigger substring. Affects six templates: implementation-plan, annotated-pr, feature-flag-editor, incident-timeline, animation-sandbox, ticket-triage. Reported and reproduced by @fxy413, with a correct root-cause analysis and a working patch suggestion.
 - **Browser edits to checkboxes, sliders, and drag-cards no longer vanish on reload.** Six interactive templates (implementation-plan, annotated-pr, feature-flag-editor, incident-timeline, animation-sandbox, ticket-triage) now ship a Save button in the header. Chromium-based browsers overwrite `plan.html` in place via the File System Access API after the first picker selection; Firefox and Safari fall back to downloading a replacement copy. The pre-0.1.1 comment claiming "writes happen in-memory only" was the artifact of an unfinished save path. It is now actually saved.
 - Render roots clear their containers before populate. Re-opening a saved file no longer double-renders the cards baked into the serialized DOM. The animation-sandbox additionally pins its dynamic style block to a stable id so reloads do not stack duplicate keyframes.
 
@@ -13,13 +14,21 @@ All notable changes to this project will be documented in this file.
 
 - Optional `ownership` field in the plan-data schema. Accepts `"agent"`, `"user"`, or `"shared"`. Reserved for v0.2.0 behavior, documented now so plan authors can start tagging plans without breaking back-compat.
 - 51 pytest assertions in `tests/test_save_handler.py` covering Save button presence, FSA-then-fallback ordering, write-back into the embedded JSON block, idempotency markers, the 35KB single-file budget, and that the four pure display templates (living-design-system, module-map, three-approaches, weekly-status) do NOT advertise Save.
+- Parser-level regression test for issue #3. `test_no_premature_script_close_in_main_body` walks each template the way the HTML parser walks raw-text mode and fails if any `<script>` block is terminated earlier than its true end-tag. Runs against all ten templates.
 
 ### Changed
 
 - Single-file size budget raised from 30KB to 35KB to absorb the inline Save handler. JSON budget unchanged at 50KB. Two templates (annotated-pr, module-map) were already at or near 30KB. The new ceiling reflects measured reality.
 
+### Security
+
+- Plan-data sanitizer in `scripts/plan-hook.py`. Every string emitted into the agent-side bracketed block now passes through `_sanitize()`, which strips ANSI escape sequences, drops control characters, folds newlines on single-line fields, neutralizes any embedded `===BEGIN PLAN DATA===` / `===END PLAN DATA===` marker by rewriting `=` to `_`, and enforces hard length caps (200 char titles, 400 goal, 200 item text, 80 template, 11 status, 40 timestamp). Patches the prompt-injection finding from the Gen Agent Trust Hub audit on 2026-05-20.
+- `session-catchup.py` bounds per-file reads at 256 KB, honors `PLANIT_NO_HISTORY=1`, and accepts `--no-history`. No code path makes network calls; the audit's data-exfiltration finding was a labeling mistake but the bounds are now enforced anyway.
+- `SECURITY.md` documents the host-IDE trust boundary, the lifecycle-hooks contract, and how to opt out by deleting the hooks block from `SKILL.md`.
+
 ### Thanks
 
+- @fxy413 for reporting issue #3 with a clean reproduction, accurate HTML-parser root cause, and a usable patch suggestion. The fix that shipped follows the same intent.
 - planning-with-files for the parity-locked bumper that made the 13-SKILL.md sweep safe.
 
 ## [0.1.0] - 2026-05-20

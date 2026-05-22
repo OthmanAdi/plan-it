@@ -163,7 +163,8 @@ HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M 
 
 ## Status
 
-- **v0.1.0** — first cut. 120/120 pytest tests green. 21-file parity-locked. Sync-verify clean.
+- **v0.1.1** (2026-05-22). Save button, idempotent re-render, sanitizer for agent-side injection, and issue #3 fix (literal `</script>` substring in a JS comment was killing tab rendering). 207/207 pytest tests green. 16-file parity-locked. Sync-verify clean.
+- **v0.1.0** (2026-05-20). First cut. 120/120 pytest tests green.
 - Roadmap: real localizations (ar/de/es/zh/zht), MDX output mode, team mode, here.now publish integration.
 
 ## License
