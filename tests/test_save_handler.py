@@ -133,3 +133,29 @@ def test_plan_data_block_still_parseable():
         except json.JSONDecodeError as e:
             raise AssertionError(f"{name} plan-data not parseable: {e}")
         assert "schema_version" in data, f"{name} plan-data missing schema_version"
+
+
+@pytest.mark.parametrize("name", TEMPLATES_WITH_SAVE + TEMPLATES_WITHOUT_SAVE)
+def test_no_premature_script_close_in_main_body(name):
+    """Regression for issue #3 (fxy413): a literal close-script substring
+    inside a JS comment or string terminates the surrounding <script> block
+    in HTML raw-text mode, dropping every line after it. Walk the file as the
+    HTML parser would and assert each <script> opens at the same offset its
+    true end-tag closes at."""
+    t = _read(name)
+    # Find every <script ...> opener that is NOT type="application/json".
+    for opener in re.finditer(
+        r'<script(?![^>]*type="application/json")[^>]*>', t
+    ):
+        body_start = opener.end()
+        first_close = re.search(r"</script", t[body_start:], re.IGNORECASE)
+        assert first_close, f"{name} <script> at offset {opener.start()} never closes"
+        true_close = re.search(r"</script\s*>", t[body_start:], re.IGNORECASE)
+        assert true_close, f"{name} <script> at offset {opener.start()} has no real end-tag"
+        assert first_close.start() == true_close.start(), (
+            f"{name}: <script> at offset {opener.start()} is terminated early "
+            f"by a literal close-script substring at body offset "
+            f"{first_close.start()}. Rewrite the comment/string so the "
+            f"substring does not appear, or the HTML parser will drop all JS "
+            f"after that point (issue #3)."
+        )

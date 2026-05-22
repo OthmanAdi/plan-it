@@ -8,6 +8,10 @@
 
 - **planning-with-files** (OthmanAdi) — The markdown-era predecessor. plan-it inherits its hook lifecycle, session catchup, SHA-256 attestation, parity-locked version bumper, and 17-IDE adapter distribution.
 
+## Reporters
+
+- **@fxy413** (issue #3, v0.1.1). Identified that a literal `</script>` substring inside a JavaScript comment was terminating the embedded script block in HTML raw-text mode, dropping all tab-switching and event-listener code in every generated `plan.html`. Provided a working repro, a correct root cause, and a usable patch.
+
 ## How to contribute
 
 - Open an issue first to discuss; PRs from drive-by commits without prior discussion get triaged but may not merge if scope creep is unclear.
