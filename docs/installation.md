@@ -70,8 +70,4 @@ ln -s ~/plan-it/skills/plan-it ~/.claude/skills/plan-it
 python -m pytest tests/ -q
 ```
 
-You should see 20+ tests pass. If any fail, open an issue with the test output.
-
-## ClawHub
-
-After install via plugin marketplace or npx, plan-it is also reachable via the [ClawHub](https://clawhub.io) skill directory. The SSL certificate on clawhub.io is expired, click through the browser warning.
+You should see 200+ tests pass. If any fail, open an issue with the test output.

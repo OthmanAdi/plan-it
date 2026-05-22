@@ -10,7 +10,7 @@
 Paste this into Claude Code to install the termination condition:
 
 ```
-/goal plan-it v0.1.0 is shipped when all of these are true: (1) canonical skills/plan-it/SKILL.md exists with valid frontmatter, 5 lifecycle hooks declared (UserPromptSubmit, PreToolUse, PostToolUse, Stop, PreCompact), and Anti-Slop + Gotchas sections present. (2) 10 HTML plan templates ship under templates/ matching Thariq's 9 categories. (3) 17 IDE adapter mirrors exist under .codex / .cursor / .codebuddy / .factory / .mastracode / .opencode / .hermes / .continue / .gemini / .kiro / .pi / clawhub-upload, byte-identical scripts. (4) 6 language variants (en/ar/de/es/zh/zht) of SKILL.md exist. (5) scripts/ has: render-plan.sh + render-plan.ps1 (open in browser), init-plan.sh + init-plan.ps1 (scaffold), attest-plan.sh + attest-plan.ps1 (SHA-256), bump-version.py, sync-ide-folders.py, session-catchup.py. (6) ≥20 pytest tests passing under tests/. (7) Parity-locked version bumper test green across 19 files. (8) A demo plan.html renders in a real browser and proves sliders + drag-cards + copy-button + collapsibles + embedded JSON data work end-to-end. (9) README.md + CHANGELOG.md + CONTRIBUTORS.md + CITATION.cff + LICENSE (MIT) + .claude-plugin/{plugin.json,marketplace.json} ready. (10) Git initialized with main branch, single squashed initial commit by OthmanAdi only, tag v0.1.0 ready to push. (11) Adi has reviewed the demo plan.html in a browser and approved aesthetic + interactivity. (12) ClawHub upload bundle prepared. Until all 12 are green: keep building, do not declare done.
+/goal plan-it v0.1.0 is shipped when all of these are true: (1) canonical skills/plan-it/SKILL.md exists with valid frontmatter, 5 lifecycle hooks declared (UserPromptSubmit, PreToolUse, PostToolUse, Stop, PreCompact), and Anti-Slop + Gotchas sections present. (2) 10 HTML plan templates ship under templates/ matching Thariq's 9 categories. (3) 11 IDE adapter mirrors exist under .codex / .cursor / .codebuddy / .factory / .mastracode / .opencode / .hermes / .continue / .gemini / .kiro / .pi, byte-identical scripts. (4) 6 language variants (en/ar/de/es/zh/zht) of SKILL.md exist. (5) scripts/ has: render-plan.sh + render-plan.ps1 (open in browser), init-plan.sh + init-plan.ps1 (scaffold), attest-plan.sh + attest-plan.ps1 (SHA-256), bump-version.py, sync-ide-folders.py, session-catchup.py. (6) ≥20 pytest tests passing under tests/. (7) Parity-locked version bumper test green across 19 files. (8) A demo plan.html renders in a real browser and proves sliders + drag-cards + copy-button + collapsibles + embedded JSON data work end-to-end. (9) README.md + CHANGELOG.md + CONTRIBUTORS.md + CITATION.cff + LICENSE (MIT) + .claude-plugin/{plugin.json,marketplace.json} ready. (10) Git initialized with main branch, single squashed initial commit by OthmanAdi only, tag v0.1.0 ready to push. (11) Adi has reviewed the demo plan.html in a browser and approved aesthetic + interactivity. Until all 11 are green: keep building, do not declare done.
 ```
 
 ## 2. Mission shape
@@ -129,7 +129,6 @@ plan-it/
 ├── .gemini/skills/plan-it/
 ├── .kiro/skills/plan-it/
 ├── .pi/skills/plan-it/
-├── clawhub-upload/                       # manual upload bundle
 ├── examples/                             # filled-in demo plans (the goal-state demo)
 ├── media/                                # banner + demo gif
 ├── README.md
@@ -219,8 +218,7 @@ allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 | Templates look like AI slop | Anti-slop rules in skill body. Demo plan.html reviewed in browser before ship. Tasteful typography commitment (system serif headers + sans-serif body where appropriate). |
 | Session catchup fails on Windows | Test matrix: Windows 11 PowerShell + Git Bash, Linux, macOS. Use known system Python paths (carry @xiaolai's PR #139 fix from pwf). |
 | Markdown-loving users churn | Add `/plan-export markdown` command that flattens plan.html → task_plan.md. Optional compat layer with pwf. |
-| Distribution: ClawHub still requires manual upload | Carry the protocol from pwf. Track v0.1.0 upload as a separate post-ship task. |
-| 17 IDE mirrors drift | Parity-bumper + parity test from day 1 (pwf v2.37.0 lesson). |
+| 11 IDE mirrors drift | Parity-bumper + parity test from day 1 (pwf v2.37.0 lesson). |
 
 ## 6. Aesthetic stance (anti-slop opinion baked in)
 
