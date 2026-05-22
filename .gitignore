@@ -38,3 +38,12 @@ build/
 
 .env
 .env.local
+
+# Local launch / strategy notes - never publish
+docs/launch-comms.md
+
+# Windows Git Bash crash artifact
+bash.exe.stackdump
+
+# Local agent state
+.claude/

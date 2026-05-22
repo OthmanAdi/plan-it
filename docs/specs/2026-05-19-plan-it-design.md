@@ -1,10 +1,9 @@
-# plan-it v0.1.0 — Design Spec
+# plan-it v0.1.0, Design Spec
 
 - Date: 2026-05-19
-- Author: Adi (OthmanAdi) + Claude Opus 4.7 (1M)
+- Author: OthmanAdi
 - Status: APPROVED for build (decisions locked 2026-05-19)
-- Working dir: `C:\Users\oasrvadmin\Documents\plan-it\`
-- Future remote: `github.com/OthmanAdi/plan-it`
+- Repo: `github.com/OthmanAdi/plan-it`
 
 ## 1. Goal (use with Claude Code `/goal`)
 
@@ -198,7 +197,7 @@ plan-it/
 
 ```yaml
 name: plan-it
-description: HTML-first persistent planning skill. Generates a single self-contained plan.html with interactive phases, drag-and-drop tickets, sliders, mockups, and embedded JSON state — survives /clear via session catchup, tamper-protected by SHA-256, mirrors across 17 IDEs. Use when asked to "plan it", "make me an HTML plan", "show me the plan", or when starting any multi-step task that needs a navigable artifact instead of a markdown wall.
+description: HTML-first persistent planning skill. Generates a single self-contained plan.html with interactive phases, drag-and-drop tickets, sliders, mockups, and embedded JSON state, survives /clear via session catchup, tamper-protected by SHA-256, mirrors across 17 IDEs. Use when asked to "plan it", "make me an HTML plan", "show me the plan", or when starting any multi-step task that needs a navigable artifact instead of a markdown wall.
 user-invocable: true
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 ```
