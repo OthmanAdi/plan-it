@@ -113,7 +113,7 @@ Claude Code · Cursor · Codex · GitHub Copilot · Mastra Code · OpenCode · H
 **Standard agent-skills support**:
 Continue · Pi Agent · OpenClaw · Antigravity · Kilocode · AdaL CLI
 
-17 byte-identical script + template mirrors. English-only for v0.1.0; localized SKILL.md variants land in v0.2.0 with real translations.
+11 byte-identical script + template mirrors plus the canonical `skills/plan-it/` bundle. English-only for v0.1.0; localized SKILL.md variants land in v0.2.0 with real translations.
 
 ## Quick demo
 
@@ -131,9 +131,17 @@ Want it back as text? `python scripts/export-markdown.py`. You get `task_plan.md
 
 ## Architecture
 
-<div align="center">
-<img src="media/architecture.svg" alt="plan-it architecture: hooks read plan.html embedded JSON, verify SHA-256, inject the active phase" width="100%">
-</div>
+```mermaid
+flowchart LR
+    U[User prompt] --> CC[Claude Code]
+    CC --> HK[/SKILL.md hooks/]
+    HK --> PH[plan-hook.py]
+    PH --> READ[(plan.html<br/>embedded JSON)]
+    PH --> SHA{SHA-256<br/>match?}
+    SHA -->|verified| INJ[Inject plan-data block]
+    SHA -->|tampered| BLK[Block injection]
+    INJ --> CC
+```
 
 In 80 characters:
 
@@ -147,9 +155,15 @@ Hooks re-inject the active phase on every prompt with `===BEGIN PLAN DATA===` ma
 
 ## Round-trip with markdown
 
-<div align="center">
-<img src="media/round-trip.svg" alt="plan-it round-trip: plan.html with embedded JSON exports cleanly to task_plan.md + findings.md + progress.md" width="100%">
-</div>
+```mermaid
+flowchart LR
+    PH[(plan.html<br/>embedded JSON)] -->|/plan-export markdown| TP[task_plan.md]
+    PH -->|/plan-export markdown| FN[findings.md]
+    PH -->|/plan-export markdown| PR[progress.md]
+    TP -.hand-edit.-> PH
+    FN -.hand-edit.-> PH
+    PR -.hand-edit.-> PH
+```
 
 For chained agents, git-committed specs, or anyone who wants source text back, `/plan-export markdown` flattens the JSON into a planning-with-files compatible trio (`task_plan.md` + `findings.md` + `progress.md`). The HTML stays canonical; the markdown is a derived view. Edit either side, the JSON is the contract.
 
@@ -159,11 +173,11 @@ HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M 
 
 ## Built on the shoulders of
 
-- **planning-with-files** ([OthmanAdi](https://github.com/OthmanAdi/planning-with-files), 21,681 stars), the markdown predecessor. Hook lifecycle, session catchup, SHA-256 attestation, parity-locked bumper, 17-IDE distribution all carry over to plan-it.
+- **planning-with-files** ([OthmanAdi](https://github.com/OthmanAdi/planning-with-files)), the markdown predecessor. Hook lifecycle, session catchup, SHA-256 attestation, parity-locked bumper, 17-IDE distribution all carry over to plan-it.
 
 ## Status
 
-- **v0.1.1** (2026-05-22). Save button, idempotent re-render, sanitizer for agent-side injection, and issue #3 fix (literal `</script>` substring in a JS comment was killing tab rendering). 207/207 pytest tests green. 16-file parity-locked. Sync-verify clean.
+- **v0.1.1** (2026-05-22). Save button, idempotent re-render, sanitizer for agent-side injection, and issue #3 fix (literal `</script>` substring in a JS comment was killing tab rendering). 207/207 pytest tests green. 15-file parity-locked. Sync-verify clean.
 - **v0.1.0** (2026-05-20). First cut. 120/120 pytest tests green.
 - Roadmap: real localizations (ar/de/es/zh/zht), MDX output mode, team mode, here.now publish integration.
 
@@ -171,4 +185,4 @@ HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M 
 
 MIT. See [LICENSE](LICENSE).
 
-Built by [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi). One squashed commit per release. Sachlich tone. No em-dashes. Run prose through [/humanizer](https://github.com/blader/humanizer) before posting.
+Built by [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi).
