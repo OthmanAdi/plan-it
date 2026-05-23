@@ -171,4 +171,4 @@ HTML uses about 2-3x the tokens of markdown for the same plan. On Opus 4.7's 1M 
 
 MIT. See [LICENSE](LICENSE).
 
-Built by [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi). One squashed commit per release. Sachlich tone. No em-dashes. Run prose through [/humanizer](https://github.com/blader/humanizer) before posting.
+Built by [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi).
